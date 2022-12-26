@@ -65,6 +65,7 @@ object FTrainer: TFTrainer
         Width = 50
       end>
     UseSystemFont = False
+    ExplicitLeft = -8
   end
   object Memo1: TMemo
     Left = 401

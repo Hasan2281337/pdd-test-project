@@ -213,7 +213,7 @@ object FMainMenu: TFMainMenu
     Top = 8
   end
   object ADOConnection1: TADOConnection
-    Provider = 'Microsoft.ACE.OLEDB.12.0'
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
     Left = 88
     Top = 8
   end

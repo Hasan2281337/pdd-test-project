@@ -41,6 +41,19 @@ object FResults: TFResults
     Height = 17
     Visible = False
   end
+  object Label2: TLabel
+    Left = 305
+    Top = 280
+    Width = 71
+    Height = 26
+    Caption = 'Label2'
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -24
+    Font.Name = 'Times New Roman'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object ListBox1: TListBox
     Left = 24
     Top = 48
@@ -114,7 +127,7 @@ object FResults: TFResults
     Visible = False
   end
   object Memo2: TMemo
-    Left = 305
+    Left = 304
     Top = 48
     Width = 323
     Height = 209

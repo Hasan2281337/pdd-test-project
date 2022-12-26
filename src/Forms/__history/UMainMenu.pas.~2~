@@ -7,7 +7,6 @@ uses
   Dialogs, StdCtrls, DB, ADODB, ExtCtrls, UConfigClient;
 
 type
-TMode = ( Education = 1, Exam = 2, Nazad = 3 );
   TFMainMenu = class(TForm)
     Button1: TButton;
     Button2: TButton;
@@ -40,9 +39,9 @@ TMode = ( Education = 1, Exam = 2, Nazad = 3 );
 var
   FMainMenu: TFMainMenu;
   number_bil:integer;
-  kol_bilets:Integer;
-   flag_ex:boolean;
-  rejim: TMode;
+  rejim,kol_bilets:Integer;
+  flag_ex:boolean;
+
 
 implementation
 
@@ -86,7 +85,7 @@ begin
     if(Fields[0].AsString <> '')then
     begin
       kol_bilets:=Fields[0].AsInteger;
-      rejim:=Exam;
+      rejim:=2;
       flag_ex:=True;
       FTrainer := TFTrainer.Create(Self);
       FTrainer.Show();
@@ -117,7 +116,7 @@ begin
     number_bil:=StrToInt(ComboBox1.Items[ComboBox1.ItemIndex]);
     FMainMenu.Hide;
     FTrainer:=TFTrainer.Create(Self);
-    rejim:=Education;
+    rejim:=1;
     flag_ex:=False;
     FTrainer.Show();
   end else

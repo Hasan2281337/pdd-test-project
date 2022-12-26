@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, DateUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, ComCtrls, JPEG, UConfigClient, System.ImageList,
   Vcl.ImgList;
 
@@ -55,12 +55,10 @@ var
   res_:array[1..20]of Integer;
   im:array[1..20]of TImage;
   sec,min:Integer;
-  bool:boolean;
 
-  //rejim: TMode;
 implementation
 
-uses UMainMenu, UResults, UDataModule;
+uses UMainMenu, UResults;
 
 {$R *.dfm}
 
@@ -73,7 +71,7 @@ var
 begin
   i:=0;
   kol_otv:=0;
-  if(rejim = Exam)and(zanovo = false)then
+  if(rejim = 2)and(zanovo = false)then
     number_bil:=Random(kol_bilets)+1;
   pyt1 := Config.PathTickets + IntToStr(number_bil)+'_bilet/';
   if(DirectoryExists(pyt1))then
@@ -108,19 +106,19 @@ begin
       3:begin RadioButton4.Visible:=False; memo5.Visible:=False; memo4.Visible:=true;RadioButton3.Visible:=true;end;
       4:begin RadioButton3.Visible:=true; RadioButton4.Visible:=true; memo4.Visible:=true; memo5.Visible:=True;end;
     end;
-    if(rejim = Exam)then
+    if(rejim = 2)then
       StatusBar1.Panels[1].Text:='     Вопрос '+IntToStr(index_vopr)+' из 20'
     else
       StatusBar1.Panels[1].Text:='Билет№'+IntToStr(number_bil)+'        Вопрос '+IntToStr(index_vopr)+' из 20';
   end;
 end;
 
+
 procedure TFTrainer.Timer1Timer(Sender: TObject);
 var
   sec_,min_:String;
 begin
-      Timer1.Tag:=Timer1.Tag+1;
-     sec:=sec+1;
+      sec:=sec+1;
       if (sec=60) then
         begin
           min:=min+1;
@@ -133,16 +131,18 @@ begin
       if (min<10) then
         min_:='0'+min_;
       StatusBar1.Panels[0].Text:='    '+min_+':'+sec_;
-      if(min = 20)and(rejim = Exam)then
-          begin
-            Timer1.Enabled:=false;
-            ShowMessage('Время вышло! Вы не сдали экзамен!');
-            Button1.Enabled:=False;
-            Button5.Visible:=True;
-            flag_ex:=true;
-            kol_error:=3;
-          end;
+  if(min = 20)and(rejim = 2)then
+  begin
+    Timer1.Enabled:=false;
+    ShowMessage('Время вышло! Вы не сдали экзамен!');
+    Button1.Enabled:=False;
+    Button5.Visible:=True;
+    flag_ex:=true;
+    kol_error:=3;
+  end;
+
 end;
+
 
 procedure TFTrainer.valid_test();
 var
@@ -156,7 +156,6 @@ begin
       res[index_vopr]:='№3';
     if(RadioButton4.Checked)then
       res[index_vopr]:='№4';
-     DataModule1.valid_test();
   with FMainMenu.ADOQuery1 do
   begin
     Close;
@@ -190,7 +189,6 @@ begin
     FMainMenu.Show;
     FMainMenu.GroupBox1.Visible:=False;
   end;
-
 end;
 
 procedure TFTrainer.Button2Click(Sender: TObject);
@@ -201,34 +199,21 @@ begin
       load_tets();
       Button5.Visible:=False;
       button3.Enabled:=True;
-      RadioButton1.Checked:=true;
-      //RadioButton1.Enabled:=false;
-      RadioButton2.Checked:=true;
-      //RadioButton2.Enabled:=false;
-      RadioButton3.Checked:=true;
-      //RadioButton3.Enabled:=false;
-      RadioButton4.Checked:=true;
-     // RadioButton4.Enabled:=false;
     end else
       ShowMessage('Вы находитесь на первом вопросе !');
 end;
 
 procedure TFTrainer.Button3Click(Sender: TObject);
-var i: integer;
 begin
   if((RadioButton1.Visible)and(RadioButton1.Checked))or((RadioButton2.Visible)and(RadioButton2.Checked))or((RadioButton3.Visible)and(RadioButton3.Checked))or((RadioButton4.Visible)and(RadioButton4.Checked))then
   begin
-  if((index_vopr+1) <= 20)then
+   if((index_vopr+1) <= 20)then
    begin
-       valid_test();
-       inc(index_vopr);
-       load_tets();
-       RadioButton1.Checked:=false;
-       RadioButton2.Checked:=false;
-       RadioButton3.Checked:=false;
-       RadioButton4.Checked:=false;
-   end else begin valid_test(); Button5.Visible:=True; Button3.Enabled:=False;  end;
-  end else ShowMessage('Выберите вариант ответа !');
+     valid_test();
+     inc(index_vopr);
+     load_tets();
+   end else begin valid_test(); Button5.Visible:=True; button3.Enabled:=False; end;
+  end else ShowMessage('Выбирете вариант ответа !');
 end;
 
 procedure TFTrainer.Button4Click(Sender: TObject);
@@ -240,16 +225,7 @@ procedure TFTrainer.Button5Click(Sender: TObject);
 begin
   FResults := TFResults.Create(nil);
   FResults.Show();
-  FTrainer.Hide;
-  if Timer1.Tag=59 then
-  begin
-  FResults.Label2.Caption:=Format('Вы потратили на тест %d сек',[Timer1.Tag]);
-  end
-  else if Timer1.Tag>60 then
-  sec:=60+sec;
-  min:=0;
-  FResults.Label2.Caption:=Format('Вы потратили на тест %d сек',[Timer1.Tag]);
-
+  FTrainer.Close;
 end;
 
 procedure TFTrainer.Button6Click(Sender: TObject);
@@ -259,9 +235,8 @@ end;
 
 procedure TFTrainer.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-      action:=caFree;
-      FTrainer:=nil;
-      FMainMenu.Show;
+  action:=caFree;
+  FTrainer:=nil;
 end;
 
 procedure TFTrainer.FormShow(Sender: TObject);
@@ -284,24 +259,22 @@ begin
   end;
 
   index_vopr:=1;
-  if(rejim = Education)then
+  if(rejim = 1)then
   begin
     load_tets();
+    Button2.Enabled:=False;
     StatusBar1.Panels[0].Text:='';
     StatusBar1.Panels[2].text:='Обучение.';
   end;
-  if(rejim = Exam) then
+  if(rejim = 2)then
   begin
     load_tets();
     Button4.Enabled:=False;
     Button2.Enabled:=False;
     StatusBar1.Panels[2].text:='Экзамен.';
-    sec:=00;
-    min:=00;
-    Timer1.Enabled:=False;
     Timer1.Enabled:=True;
   end;
-  if(rejim = Nazad)then
+  if(rejim = 3)then
   begin
     Panel1.Visible:=True;
     Button1.Visible:=False;
