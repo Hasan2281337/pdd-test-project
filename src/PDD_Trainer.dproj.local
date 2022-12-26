@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2022.12.26 17:57:36.840,=C:\Users\mohi1\Desktop\pdd-test-project-master\src\Unit1.pas</Transaction>
+    <Transaction>2022.12.26 18:33:29.737,C:\Users\mohi1\Desktop\pdd-test-project-master\src\UDataModule.pas=C:\Users\mohi1\Desktop\pdd-test-project-master\src\Unit1.pas</Transaction>
+    <Transaction>2022.12.26 18:33:29.737,C:\Users\mohi1\Desktop\pdd-test-project-master\src\UDataModule.dfm=C:\Users\mohi1\Desktop\pdd-test-project-master\src\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>
