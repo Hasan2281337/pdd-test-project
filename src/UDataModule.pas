@@ -1,5 +1,6 @@
 unit UDataModule;
 
+
 interface
 
 uses
@@ -11,6 +12,7 @@ type
     ADOConnection1: TADOConnection;
     ADOQuery1: TADOQuery;
     procedure valid_test();
+
   private
     { Private declarations }
   public
@@ -26,6 +28,8 @@ uses UMainMenu, UResults, UTrainer;
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
 {$R *.dfm}
+
+
 procedure TDataModule1.valid_test();
 var
   true_otv:String;
@@ -47,9 +51,7 @@ begin
     Open;
     true_otv:=Fields[index_vopr].AsString;
   end;
-
   {im[index_vopr].Picture.Bitmap := nil;
-
   if(true_otv = res[index_vopr])then
   begin
     ImageList1.GetBitmap(0, im[index_vopr].Picture.Bitmap);
