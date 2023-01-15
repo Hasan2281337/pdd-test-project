@@ -217,4 +217,8 @@ object FMainMenu: TFMainMenu
     Left = 88
     Top = 8
   end
+  object SQLConnection1: TSQLConnection
+    Left = 24
+    Top = 448
+  end
 end

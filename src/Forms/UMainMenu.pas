@@ -4,10 +4,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, DB, ADODB, ExtCtrls, UConfigClient;
+  Dialogs, StdCtrls, DB, ADODB, ExtCtrls, UConfigClient, Data.SqlExpr;
 
 type
-TMode = ( Education = 1, Exam = 2, Nazad = 3 );
   TFMainMenu = class(TForm)
     Button1: TButton;
     Button2: TButton;
@@ -23,6 +22,7 @@ TMode = ( Education = 1, Exam = 2, Nazad = 3 );
     Button7: TButton;
     Memo1: TMemo;
     ADOConnection1: TADOConnection;
+    SQLConnection1: TSQLConnection;
     procedure Button1Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
@@ -40,9 +40,8 @@ TMode = ( Education = 1, Exam = 2, Nazad = 3 );
 var
   FMainMenu: TFMainMenu;
   number_bil:integer;
-  kol_bilets:Integer;
+  rejim,kol_bilets:Integer;
    flag_ex:boolean;
-  rejim: TMode;
 
 implementation
 
@@ -86,7 +85,7 @@ begin
     if(Fields[0].AsString <> '')then
     begin
       kol_bilets:=Fields[0].AsInteger;
-      rejim:=Exam;
+      rejim:=2;
       flag_ex:=True;
       FTrainer := TFTrainer.Create(Self);
       FTrainer.Show();
@@ -117,7 +116,7 @@ begin
     number_bil:=StrToInt(ComboBox1.Items[ComboBox1.ItemIndex]);
     FMainMenu.Hide;
     FTrainer:=TFTrainer.Create(Self);
-    rejim:=Education;
+    rejim:=1;
     flag_ex:=False;
     FTrainer.Show();
   end else
@@ -148,7 +147,6 @@ begin
         'Jet OLEDB:Don'+'''t Copy Locale on Compact=False;'+
         'Jet OLEDB:Compact Without Replica Repair=False;'+
         'Jet OLEDB:SFP=False';
-
     ADOConnection1.Connected := true;
   except on E : Exception do
     begin

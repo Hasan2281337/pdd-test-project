@@ -3,9 +3,9 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, DateUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls, ComCtrls, JPEG, UConfigClient, System.ImageList,
-  Vcl.ImgList;
+  Vcl.ImgList,  DB, ADODB, Data.SqlExpr;
 
 type
   TFTrainer = class(TForm)
@@ -31,6 +31,9 @@ type
     Memo6: TMemo;
     Button6: TButton;
     ImageList1: TImageList;
+    ADOQuery1: TADOQuery;
+    SQLConnection1: TSQLConnection;
+    ADOConnection1: TADOConnection;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure Button1Click(Sender: TObject);
     procedure load_tets();
@@ -42,12 +45,16 @@ type
     procedure FormShow(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Back();
+    procedure Forward();
   private
     { Private declarations }
   public
     { Public declarations }
   end;
-
+ type
+TMode = ( Education = 1, Exam = 2, Nazad = 3 );
 var
   FTrainer: TFTrainer;
   index_vopr:Integer;
@@ -56,8 +63,8 @@ var
   im:array[1..20]of TImage;
   sec,min:Integer;
   bool:boolean;
-
-  //rejim: TMode;
+  results:array[1..20] of Integer;
+  totallnSeconds: TDateTime;
 implementation
 
 uses UMainMenu, UResults, UDataModule;
@@ -67,32 +74,46 @@ uses UMainMenu, UResults, UDataModule;
 procedure TFTrainer.load_tets();
 var
   i:Integer;
-  tmp_str,tmp_otv,tmp_otv2,tmp_otv3,tmp_otv4:String;
+  tmp_str,tmp_otv:String;
   kol_otv:Integer;
   pyt1:String;
 begin
-  i:=0;
+  for i:=1 to 20 do
+    results[i]:=0;
   kol_otv:=0;
-  if(rejim = Exam)and(zanovo = false)then
+  if(rejim = Ord(Exam)) and(zanovo = false) then begin
     number_bil:=Random(kol_bilets)+1;
+  end;
+
   pyt1 := Config.PathTickets + IntToStr(number_bil)+'_bilet/';
   if(DirectoryExists(pyt1))then
   begin
-    memo1.Lines.LoadFromFile(pyt1+IntToStr(index_vopr)+'_text.txt');
-    memo6.Lines.LoadFromFile(pyt1+IntToStr(index_vopr)+'_help.txt');
+      with FMainMenu.ADOQuery1 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Text:='SELECT [vopros_' + IntToStr(index_vopr) + '], [help_' + IntToStr(index_vopr) + '], [answers_'+ IntToStr(index_vopr)+ '] FROM tickets, help, answers where tickets.id=' + IntToStr(number_bil) + 'and answers.ID=' + IntToStr(number_bil) + 'and help.ID = ' + IntToStr (number_bil);
+        Open;
+        First;
+        memo1.Lines.Text := Fields[0].AsString;
+        memo6.Lines.Text := Fields[1].AsString;
+        memo2.Lines.Text := Fields[2].AsString;
+  end;
+    {memo1.Lines.LoadFromFile(pyt1+IntToStr(index_vopr)+'_text.txt');
+    memo6.Lines.LoadFromFile(pyt1+IntToStr(index_vopr)+'_help.txt'); }
     if(FileExists(pyt1+IntToStr(index_vopr)+'_pic.jpg'))then
       Image1.Picture.LoadFromFile(pyt1+IntToStr(index_vopr)+'_pic.jpg') else
       Image1.Picture.Graphic:=nil;
-    memo2.Lines.LoadFromFile(pyt1+IntToStr(index_vopr)+'_otv.txt');
+      //memo2.Lines.LoadFromFile(pyt1+IntToStr(index_vopr)+'_otv.txt');
     tmp_str:=memo2.lines.text;
     memo2.Clear;
     while (pos('#',tmp_str) > 0) do
     begin
       if(pos('#',tmp_str) > 0)then
       begin
-        tmp_otv:=Copy(tmp_str,pos('#',tmp_str)+2,pos(#13#10,tmp_str)-2);
+        tmp_otv:=Copy(tmp_str,pos('#',tmp_str)+2,pos('.',tmp_str)-2);
         inc(kol_otv);
-        Delete(tmp_str,pos('#',tmp_str),pos(#13#10,tmp_str));
+        Delete(tmp_str,pos('#',tmp_str),pos('.',tmp_str));
         if(kol_otv = 1)then
           memo2.Text:=tmp_otv;
         if(kol_otv = 2)then
@@ -104,16 +125,28 @@ begin
       end;
     end;
     case kol_otv of
-      2:begin RadioButton3.Visible:=False; RadioButton4.Visible:=False; memo4.Visible:=False; memo5.Visible:=False;end;
-      3:begin RadioButton4.Visible:=False; memo5.Visible:=False; memo4.Visible:=true;RadioButton3.Visible:=true;end;
-      4:begin RadioButton3.Visible:=true; RadioButton4.Visible:=true; memo4.Visible:=true; memo5.Visible:=True;end;
+      2:
+      begin
+      RadioButton1.Visible:=true; RadioButton2.Visible:=true; RadioButton3.Visible:=False; RadioButton4.Visible:=False; memo4.Visible:=False; memo5.Visible:=False;
+      RadioButton1.Enabled:=true; RadioButton2.Enabled:=true; RadioButton3.Enabled:=False; RadioButton4.Enabled:=False;
+      end;
+      3:
+      begin
+      RadioButton1.Visible:=true; RadioButton2.Visible:=true; RadioButton3.Visible:=True; RadioButton4.Visible:=False; memo5.Visible:=False; memo4.Visible:=true;
+      RadioButton1.Enabled:=true; RadioButton2.Enabled:=true; RadioButton3.Enabled:=True; RadioButton4.Enabled:=False;
+      end;
+      4:
+      begin
+      RadioButton1.Visible:=true; RadioButton2.Visible:=true; RadioButton3.Visible:=True; RadioButton4.Visible:=true; memo4.Visible:=true; memo5.Visible:=True;
+      RadioButton1.Enabled:=true; RadioButton2.Enabled:=true; RadioButton3.Enabled:=True; RadioButton4.Enabled:=True;
+      end;
     end;
-    if(rejim = Exam)then
+    if(rejim = Ord(Exam))then
       StatusBar1.Panels[1].Text:='     Вопрос '+IntToStr(index_vopr)+' из 20'
     else
       StatusBar1.Panels[1].Text:='Билет№'+IntToStr(number_bil)+'        Вопрос '+IntToStr(index_vopr)+' из 20';
   end;
-end;
+ end;
 
 procedure TFTrainer.Timer1Timer(Sender: TObject);
 var
@@ -133,7 +166,7 @@ begin
       if (min<10) then
         min_:='0'+min_;
       StatusBar1.Panels[0].Text:='    '+min_+':'+sec_;
-      if(min = 20)and(rejim = Exam)then
+      if(min = 20)and(rejim = Ord(Exam))then
           begin
             Timer1.Enabled:=false;
             ShowMessage('Время вышло! Вы не сдали экзамен!');
@@ -149,14 +182,25 @@ var
   true_otv:String;
 begin
     if(RadioButton1.Checked)then
+    begin
       res[index_vopr]:='№1';
+      results[index_vopr]:=1;
+    end;
     if(RadioButton2.Checked)then
+      begin
       res[index_vopr]:='№2';
+      results[index_vopr]:=2;
+    end;
     if(RadioButton3.Checked)then
+      begin
       res[index_vopr]:='№3';
+      results[index_vopr]:=3;
+    end;
     if(RadioButton4.Checked)then
+      begin
       res[index_vopr]:='№4';
-     DataModule1.valid_test();
+      results[index_vopr]:=4;
+    end;
   with FMainMenu.ADOQuery1 do
   begin
     Close;
@@ -168,7 +212,6 @@ begin
   end;
 
   im[index_vopr].Picture.Bitmap := nil;
-
   if(true_otv = res[index_vopr])then
   begin
     ImageList1.GetBitmap(0, im[index_vopr].Picture.Bitmap);
@@ -249,7 +292,7 @@ begin
   sec:=60+sec;
   min:=0;
   FResults.Label2.Caption:=Format('Вы потратили на тест %d сек',[Timer1.Tag]);
-
+  //FResults.Label2.Caption:= FormatDateTime('nn:ss', totallnSeconds); /00:00
 end;
 
 procedure TFTrainer.Button6Click(Sender: TObject);
@@ -284,13 +327,13 @@ begin
   end;
 
   index_vopr:=1;
-  if(rejim = Education)then
+  if(rejim = Ord(Education))then
   begin
     load_tets();
     StatusBar1.Panels[0].Text:='';
     StatusBar1.Panels[2].text:='Обучение.';
   end;
-  if(rejim = Exam) then
+  if(rejim = Ord(Exam)) then
   begin
     load_tets();
     Button4.Enabled:=False;
@@ -301,7 +344,7 @@ begin
     Timer1.Enabled:=False;
     Timer1.Enabled:=True;
   end;
-  if(rejim = Nazad)then
+  if(rejim = Ord(Nazad))then
   begin
     Panel1.Visible:=True;
     Button1.Visible:=False;
@@ -310,4 +353,37 @@ begin
   end;
 end;
 
+procedure TFTrainer.FormCreate(Sender: TObject);
+begin
+  var PASSWORD_TO_DB := EmptyStr;
+
+  try
+    ADOConnection1.ConnectionString :=
+        'Provider=Microsoft.Jet.OLEDB.4.0;'+
+        'User ID=Admin;'+
+        'Data Source='+Config.PathDataBase+';'+
+        'Mode=Share Deny None;'+
+        'Extended Properties="";'+
+        'Jet OLEDB:System database="";'+
+        'Jet OLEDB:Registry Path="";'+
+        'Jet OLEDB:Database Password="'+PASSWORD_TO_DB+'";'+
+        'Jet OLEDB:Engine Type=5;'+
+        'Jet OLEDB:Database Locking Mode=1;'+
+        'Jet OLEDB:Global Partial Bulk Ops=2;'+
+        'Jet OLEDB:Global Bulk Transactions=1;'+
+        'Jet OLEDB:New Database Password="'+PASSWORD_TO_DB+'";'+
+        'Jet OLEDB:Create System Database=False;'+
+        'Jet OLEDB:Encrypt Database=False;'+
+        'Jet OLEDB:Don'+'''t Copy Locale on Compact=False;'+
+        'Jet OLEDB:Compact Without Replica Repair=False;'+
+        'Jet OLEDB:SFP=False';
+
+    ADOConnection1.Connected := true;
+  except on E : Exception do
+    begin
+      ShowMessage(Format('Ошибка при подключении к БД. %s', [E.Message]));
+      Application.Terminate;
+    end;
+  end;
+end;
 end.

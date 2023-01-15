@@ -13,8 +13,9 @@ object FTrainer: TFTrainer
   Font.Name = 'Times New Roman'
   Font.Style = [fsBold]
   OldCreateOrder = False
-  Position = poMainFormCenter
+  Position = poDesigned
   OnClose = FormClose
+  OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 22
@@ -2097,5 +2098,24 @@ object FTrainer: TFTrainer
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000}
+  end
+  object ADOQuery1: TADOQuery
+    Connection = FMainMenu.ADOConnection1
+    Parameters = <>
+    Left = 352
+    Top = 496
+  end
+  object SQLConnection1: TSQLConnection
+    Left = 432
+    Top = 488
+  end
+  object ADOConnection1: TADOConnection
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\mohi1\Desk' +
+      'top\pdd-test-project-master\data\pdd_db.mdb;Persist Security Inf' +
+      'o=False'
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 544
+    Top = 496
   end
 end
