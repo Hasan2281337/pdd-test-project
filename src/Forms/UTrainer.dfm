@@ -198,7 +198,7 @@ object FTrainer: TFTrainer
     OnClick = Button4Click
   end
   object Button5: TButton
-    Left = 704
+    Left = 703
     Top = 504
     Width = 138
     Height = 37
@@ -2099,23 +2099,30 @@ object FTrainer: TFTrainer
       0000000000000000000000000000000000000000000000000000000000000000
       0000}
   end
-  object ADOQuery1: TADOQuery
-    Connection = FMainMenu.ADOConnection1
-    Parameters = <>
-    Left = 352
-    Top = 496
-  end
   object SQLConnection1: TSQLConnection
+    LoginPrompt = False
     Left = 432
     Top = 488
   end
   object ADOConnection1: TADOConnection
     ConnectionString = 
-      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\mohi1\Desk' +
-      'top\pdd-test-project-master\data\pdd_db.mdb;Persist Security Inf' +
-      'o=False'
+      'Provider=Microsoft.Jet.OLEDB.4.0;User ID=Admin;Data Source=pdd_d' +
+      'b.mdb;Mode=Share Deny None;Persist Security Info=False;Jet OLEDB' +
+      ':System database="";Jet OLEDB:Registry Path="";Jet OLEDB:Databas' +
+      'e Password="";Jet OLEDB:Engine Type=5;Jet OLEDB:Database Locking' +
+      ' Mode=1;Jet OLEDB:Global Partial Bulk Ops=2;Jet OLEDB:Global Bul' +
+      'k Transactions=1;Jet OLEDB:New Database Password="";Jet OLEDB:Cr' +
+      'eate System Database=False;Jet OLEDB:Encrypt Database=False;Jet ' +
+      'OLEDB:Don'#39't Copy Locale on Compact=False;Jet OLEDB:Compact Witho' +
+      'ut Replica Repair=False;Jet OLEDB:SFP=False'
     Provider = 'Microsoft.Jet.OLEDB.4.0'
     Left = 544
+    Top = 496
+  end
+  object ADOQuery1: TADOQuery
+    Connection = ADOConnection1
+    Parameters = <>
+    Left = 344
     Top = 496
   end
 end

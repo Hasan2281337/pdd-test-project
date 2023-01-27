@@ -1,18 +1,14 @@
 ﻿unit UMainMenu;
-
 interface
-
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, DB, ADODB, ExtCtrls, UConfigClient, Data.SqlExpr;
-
 type
   TFMainMenu = class(TForm)
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
     Button4: TButton;
-    ADOQuery1: TADOQuery;
     Panel1: TPanel;
     Button5: TButton;
     GroupBox1: TGroupBox;
@@ -23,6 +19,23 @@ type
     Memo1: TMemo;
     ADOConnection1: TADOConnection;
     SQLConnection1: TSQLConnection;
+    GroupBox2: TGroupBox;
+    Label1: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    EditLogin: TEdit;
+    EditPassword: TEdit;
+    Enter: TButton;
+    Registration: TButton;
+    GroupBox3: TGroupBox;
+    Label6: TLabel;
+    Label7: TLabel;
+    EditRegLogin: TEdit;
+    EditRegPassword: TEdit;
+    Button8: TButton;
+    ADOQuery1: TADOQuery;
+    Button9: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
@@ -31,84 +44,56 @@ type
     procedure Button6Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure EnterClick(Sender: TObject);
+    procedure RegistrationClick(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+
   private
     { Private declarations }
   public
     { Public declarations }
   end;
-
 var
   FMainMenu: TFMainMenu;
   number_bil:integer;
   rejim,kol_bilets:Integer;
    flag_ex:boolean;
-
 implementation
-
-uses UTrainer;
-
+uses UTrainer, UDataModule, Unit1;
 {$R *.dfm}
-
 procedure TFMainMenu.Button1Click(Sender: TObject);
 begin
   if(application.MessageBox(PChar('Хотите выйти из программы ?'),'Информация .',mb_YesNo or mb_iconquestion)=mrYes)then
     FMainMenu.Close;
 end;
-
 procedure TFMainMenu.Button2Click(Sender: TObject);
 begin
   ComboBox1.Clear;
-  with ADOQuery1 do
-  begin
-    Close;
-    SQL.Clear;
-    SQL.Text:='SELECT * FROM bilets';
-    Open;
-    First;
-    WHile not(eof) do
-    begin
-      ComboBox1.Items.Add(Fields[0].AsString);
-      Next;
-    end;
-  end;
+  DataModule1.Bilets;
   GroupBox1.Visible:=True;
 end;
-
 procedure TFMainMenu.Button3Click(Sender: TObject);
 begin
-  with ADOQuery1 do
-  begin
-    Close;
-    SQL.Clear;
-    SQL.Text:='SELECT COUNT(*) FROM bilets';
-    Open;
-    if(Fields[0].AsString <> '')then
-    begin
-      kol_bilets:=Fields[0].AsInteger;
-      rejim:=2;
-      flag_ex:=True;
-      FTrainer := TFTrainer.Create(Self);
-      FTrainer.Show();
-      FMainMenu.Hide;
-    end;
-  end;
+  kol_bilets:=DataModule1.ExamQuery();
+  rejim:=Ord(Exam);
+  flag_ex:=True;
+  FTrainer:= TFTrainer.Create(Application);
+  FTrainer.Show();
+  FMainMenu.Hide;
 end;
-
 procedure TFMainMenu.Button4Click(Sender: TObject);
 begin
   Panel1.Visible := True;
 end;
-
 procedure TFMainMenu.Button5Click(Sender: TObject);
 begin
   Panel1.Visible:=False;
 end;
-
 procedure TFMainMenu.Button6Click(Sender: TObject);
 begin
   GroupBox1.Visible:=False;
 end;
-
 procedure TFMainMenu.Button7Click(Sender: TObject);
 begin
   if(ComboBox1.ItemIndex <> -1)then
@@ -116,17 +101,60 @@ begin
     number_bil:=StrToInt(ComboBox1.Items[ComboBox1.ItemIndex]);
     FMainMenu.Hide;
     FTrainer:=TFTrainer.Create(Self);
-    rejim:=1;
+    rejim:=Ord(Education);
     flag_ex:=False;
     FTrainer.Show();
   end else
     ShowMessage('Вы не выбрали билет!');
 end;
+procedure TFMainMenu.Button8Click(Sender: TObject); //регистрация
+begin
+    if (EditRegLogin.Text<>' ') and (EditRegPassword.Text<>' ') then
+    begin
+    ADOQuery1.SQL.text:='INSERT INTO users (UserName, UserPass) VALUES('+QuotedStr(EditRegLogin.Text)+', '+QuotedStr(EditRegPassword.Text)+')';
+    ADOQuery1.ExecSQL;
+    end;
+    Groupbox3.Visible:=False;
+    Groupbox2.Visible:=True;
+end;
+
+procedure TFMainMenu.Button9Click(Sender: TObject);
+begin
+FMainMenu.Hide;
+Application.CreateForm(TDB_Results,DB_Results);
+DB_Results.ShowModal;
+end;
+
+procedure TFMainMenu.EnterClick(Sender: TObject); //авторизация
+begin
+  begin
+  ADOQuery1.SQL.Clear;
+  ADOQuery1.SQL.Add('SELECT UserPass FROM users WHERE UserName='+#39+EditLogin.Text+#39);
+  ADOQuery1.Open;
+  if ADOQuery1.IsEmpty
+    then
+    begin
+      ShowMessage('Пользователь '+EditLogin.Text+' не найден!');
+      Groupbox2.Visible:= True;
+    end
+    else
+      if ADOQuery1.FieldByName('UserPass').Value <> EditPassword.Text
+        then
+        begin
+          ShowMessage('Введен не верный пароль!');
+          Groupbox2.Visible:= True;
+        end
+        else
+          Groupbox2.Visible:=False;
+          FMainMenu.Show;
+  end;
+end;
 
 procedure TFMainMenu.FormCreate(Sender: TObject);
 begin
+  GroupBox2.Visible:=True;
+  GroupBox3.Visible:=False;
   var PASSWORD_TO_DB := EmptyStr;
-
   try
     ADOConnection1.ConnectionString :=
         'Provider=Microsoft.Jet.OLEDB.4.0;'+
@@ -154,6 +182,13 @@ begin
       Application.Terminate;
     end;
   end;
+end;
+
+
+procedure TFMainMenu.RegistrationClick(Sender: TObject);// переход к регистрации
+begin
+Groupbox2.Visible:=False;
+Groupbox3.Visible:=True;
 end;
 
 end.

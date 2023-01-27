@@ -19,7 +19,6 @@ type
     procedure ListBox1DblClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
-    //function SecondsBetween(const ANow, AThen: TDateTime): Int64;
   private
     { Private declarations }
   public
@@ -30,9 +29,6 @@ var
   im_valid:array[1..20]of TImage;
   kol_error:integer;
   zanovo:boolean;
-  //Start, Stop: TDateTime;
-  //Elapsed: int64;
-  //sec:string;
 implementation
 uses UTrainer, UMainMenu;
 {$R *.dfm}
