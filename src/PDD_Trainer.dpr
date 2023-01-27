@@ -9,8 +9,7 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   UDataModule in 'UDataModule.pas' {DataModule1: TDataModule},
-  Unit1 in 'Unit1.pas' {Form1},
-  Unit2 in 'Unit2.pas' {Form2};
+  Unit1 in 'Forms\Unit1.pas' {DB_Results};
 
 {$R *.res}
 begin
@@ -19,9 +18,8 @@ begin
   Config := TAccessToFiles.Create();
   Application.CreateForm(TFMainMenu, FMainMenu);
   Application.CreateForm(TFTrainer, FTrainer);
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
   Application.CreateForm(TFResults, FResults);
   Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TDB_Results, DB_Results);
   Application.Run;
 end.
